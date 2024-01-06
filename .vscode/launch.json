@@ -1,0 +1,14 @@
+{
+    "configurations": [
+        {
+            "type": "gdb",
+            "request": "attach",
+            "name": "Attach to gdbserver",
+            "executable": "${workspaceRoot}/obj/kern/kernel",
+            "target": "localhost:25501",
+            "remote": true,
+            "cwd": "${workspaceRoot}", 
+            "gdbpath": "/Users/ioannco/KERNEL/ispras-gdb/bin/gdb-multiarch",
+        }
+    ]
+}

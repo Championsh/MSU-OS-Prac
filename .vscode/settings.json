@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "loadedimage.h": "c",
+        "graphicsoutput.h": "c"
+    }
+}

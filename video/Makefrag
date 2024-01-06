@@ -1,0 +1,21 @@
+OBJDIRS += video
+
+VIDFILES := $(OBJDIR)/video/vga_server.o \
+			$(OBJDIR)/video/svga.o \
+			#$(OBJDIR)/fs/serv.o \
+			$(OBJDIR)/fs/test.o \
+			$(OBJDIR)/fs/pci.o \
+			$(OBJDIR)/fs/nvme.o
+
+$(OBJDIR)/video/%.o: video/%.c fs/pci.h inc/lib.h $(OBJDIR)/.vars.USER_CFLAGS
+	@echo + cc[VIDEO] $<
+	@mkdir -p $(@D)
+	$(V)$(CC) $(USER_CFLAGS) $(USER_SAN_CFLAGS) -c -o $@ $<
+
+$(OBJDIR)/video/video: $(VIDFILES) $(OBJDIR)/lib/entry.o $(OBJDIR)/lib/libjos.a $(USER_EXTRA_OBJFILES) user/user.ld
+	@echo + ld $@
+	$(V)mkdir -p $(@D)
+	$(V)$(LD) -o $@ $(ULDFLAGS) $(LDFLAGS) $(USER_SAN_LDFLAGS) -nostdlib \
+		$(OBJDIR)/lib/entry.o $(VIDFILES) obj/fs/pci.o $(USER_EXTRA_OBJFILES) \
+		-L$(OBJDIR)/lib -ljos $(GCC_LIB)
+	$(V)$(OBJDUMP) -S $@ >$@.asm

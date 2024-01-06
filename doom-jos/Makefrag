@@ -1,0 +1,48 @@
+OBJDIRS += doom-jos
+
+# DOOM build
+DOOM_FLAGS := -fno-pic -pipe -Ddebug=0 -fno-builtin -I. -MD -O1 -ffreestanding \
+-fno-omit-frame-pointer -mno-red-zone -Wall -Wformat=2 \
+-g -gpubnames -gdwarf-4 -fno-stack-protector -mno-sse -mno-sse2 \
+-mno-mmx -DLAB=12 -mcmodel=large -m64 -DJOS_USER \
+#`sdl2-config --cflags`
+
+#DOOM_LDFLAGS+=-lm -lc `sdl2-config --cflags --libs`
+DOOM_LDFLAGS := -T user/user.ld --warn-common -m elf_x86_64 -z max-page-size=0x1000 \
+--print-gc-sections --warn-common -z noexecstack -nostdlib obj/lib/entry.o \
+-Lobj/lib -ljos
+
+SRC_DOOM = $(OBJDIR)/doom-jos/dummy.o $(OBJDIR)/doom-jos/am_map.o $(OBJDIR)/doom-jos/doomdef.o $(OBJDIR)/doom-jos/doomstat.o \
+$(OBJDIR)/doom-jos/dstrings.o $(OBJDIR)/doom-jos/d_event.o $(OBJDIR)/doom-jos/d_items.o $(OBJDIR)/doom-jos/d_iwad.o \
+$(OBJDIR)/doom-jos/d_loop.o $(OBJDIR)/doom-jos/d_main.o $(OBJDIR)/doom-jos/d_mode.o $(OBJDIR)/doom-jos/d_net.o \
+$(OBJDIR)/doom-jos/f_finale.o $(OBJDIR)/doom-jos/f_wipe.o $(OBJDIR)/doom-jos/g_game.o $(OBJDIR)/doom-jos/hu_lib.o \
+$(OBJDIR)/doom-jos/hu_stuff.o $(OBJDIR)/doom-jos/info.o $(OBJDIR)/doom-jos/i_cdmus.o $(OBJDIR)/doom-jos/i_endoom.o \
+$(OBJDIR)/doom-jos/i_joystick.o $(OBJDIR)/doom-jos/i_scale.o $(OBJDIR)/doom-jos/i_sound.o $(OBJDIR)/doom-jos/i_system.o \
+$(OBJDIR)/doom-jos/i_timer.o $(OBJDIR)/doom-jos/memio.o $(OBJDIR)/doom-jos/m_argv.o $(OBJDIR)/doom-jos/m_bbox.o \
+$(OBJDIR)/doom-jos/m_cheat.o $(OBJDIR)/doom-jos/m_config.o $(OBJDIR)/doom-jos/m_controls.o $(OBJDIR)/doom-jos/m_fixed.o \
+$(OBJDIR)/doom-jos/m_menu.o $(OBJDIR)/doom-jos/m_misc.o $(OBJDIR)/doom-jos/m_random.o $(OBJDIR)/doom-jos/p_ceilng.o \
+$(OBJDIR)/doom-jos/p_doors.o $(OBJDIR)/doom-jos/p_enemy.o $(OBJDIR)/doom-jos/p_floor.o $(OBJDIR)/doom-jos/p_inter.o \
+$(OBJDIR)/doom-jos/p_lights.o $(OBJDIR)/doom-jos/p_map.o $(OBJDIR)/doom-jos/p_maputl.o $(OBJDIR)/doom-jos/p_mobj.o \
+$(OBJDIR)/doom-jos/p_plats.o $(OBJDIR)/doom-jos/p_pspr.o $(OBJDIR)/doom-jos/p_saveg.o $(OBJDIR)/doom-jos/p_setup.o \
+$(OBJDIR)/doom-jos/p_sight.o $(OBJDIR)/doom-jos/p_spec.o $(OBJDIR)/doom-jos/p_switch.o $(OBJDIR)/doom-jos/p_telept.o \
+$(OBJDIR)/doom-jos/p_tick.o $(OBJDIR)/doom-jos/p_user.o $(OBJDIR)/doom-jos/r_bsp.o $(OBJDIR)/doom-jos/r_data.o \
+$(OBJDIR)/doom-jos/r_draw.o $(OBJDIR)/doom-jos/r_main.o $(OBJDIR)/doom-jos/r_plane.o $(OBJDIR)/doom-jos/r_segs.o \
+$(OBJDIR)/doom-jos/r_sky.o $(OBJDIR)/doom-jos/r_things.o $(OBJDIR)/doom-jos/sha1.o $(OBJDIR)/doom-jos/sounds.o \
+$(OBJDIR)/doom-jos/statdump.o $(OBJDIR)/doom-jos/st_lib.o $(OBJDIR)/doom-jos/st_stuff.o $(OBJDIR)/doom-jos/s_sound.o \
+$(OBJDIR)/doom-jos/tables.o $(OBJDIR)/doom-jos/v_video.o $(OBJDIR)/doom-jos/wi_stuff.o $(OBJDIR)/doom-jos/w_checksum.o \
+$(OBJDIR)/doom-jos/w_file.o $(OBJDIR)/doom-jos/w_main.o $(OBJDIR)/doom-jos/w_wad.o $(OBJDIR)/doom-jos/z_zone.o \
+$(OBJDIR)/doom-jos/w_file_stdc.o $(OBJDIR)/doom-jos/i_input.o $(OBJDIR)/doom-jos/i_video.o $(OBJDIR)/doom-jos/doomgeneric.o \
+$(OBJDIR)/doom-jos/doomgeneric_sdl.o $(OBJDIR)/doom-jos/mus2mid.o $(OBJDIR)/doom-jos/i_sdlmusic.o $(OBJDIR)/doom-jos/i_sdlsound.o \
+
+$(OBJDIR)/doom-jos/%.o: doom-jos/%.c inc/lib.h
+	@echo + cc[DOOM] $<
+	@mkdir -p $(@D)
+	$(V)$(CC) $(DOOM_FLAGS) $(USER_SAN_CFLAGS) -c -o $@ $<
+
+$(OBJDIR)/doom-jos/doom: $(SRC_DOOM) $(OBJDIR)/lib/entry.o $(OBJDIR)/lib/libjos.a $(USER_EXTRA_OBJFILES) user/user.ld
+	@echo + ld $@
+	$(V)mkdir -p $(@D)
+	ld.lld $(ULDFLAGS) $(LDFLAGS) $(USER_SAN_LDFLAGS) \
+		$(OBJDIR)/lib/entry.o $(USER_EXTRA_OBJFILES) $(SRC_DOOM) \
+		$(GCC_LIB) -L$(OBJDIR)/lib -ljos -o $@
+	$(V)$(OBJDUMP) -S $@ >$@.asm

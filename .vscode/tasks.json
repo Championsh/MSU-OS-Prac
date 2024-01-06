@@ -1,0 +1,9 @@
+{
+    "version": "2.0.0",
+    "tasks": [{
+        "label": "qemu-gdb",
+        "command": "make", // Could be any other shell command
+        "args": ["qemu-gdb"],
+        "type": "shell"
+    }]
+}
